@@ -16,13 +16,12 @@ public class FirehoseReader {
     private String subscriptionId;
 
     @Autowired
-    public FirehoseReader(FirehoseProperties props) {
+    public FirehoseReader(FirehoseProperties props, ApplicationContext context) {
         this.props = props;
-    }
 
-    public void initialize(Object bean) {
-        FirehoseNozzle fn[] = bean.getClass().getAnnotationsByType(FirehoseNozzle.class);
-        this.subscriptionId = fn[0].subscriptionId();
+        String[] names = context.getBeanNamesForAnnotation(FirehoseNozzle.class);
+        FirehoseNozzle fn = context.findAnnotationOnBean(names[0],FirehoseNozzle.class);
+        this.subscriptionId = fn.subscriptionId();
 
         System.out.println("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") " + Calendar.getInstance().getTimeInMillis() + " **************");
         System.out.println("************ " + this.toString());

@@ -17,6 +17,7 @@ public class FirehoseNozzleCreator implements ApplicationListener<ApplicationRea
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
+        /*
         System.out.println("************ FirehoseNozzleCreator onApplicationEvent! (" + this.hashCode() + ") " + Calendar.getInstance().getTimeInMillis() + " **************");
         ApplicationContext context = event.getApplicationContext();
         String[] names = context.getBeanNamesForAnnotation(FirehoseNozzle.class);
@@ -26,6 +27,6 @@ public class FirehoseNozzleCreator implements ApplicationListener<ApplicationRea
             rdr.initialize(bean);
             context.getAutowireCapableBeanFactory().initializeBean(rdr,name + BEAN_SUFFIX);
         }
-
+        */
     }
 }
