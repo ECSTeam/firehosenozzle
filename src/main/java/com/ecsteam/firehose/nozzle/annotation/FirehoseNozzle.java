@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Import(FirehoseNozzleConfiguration.class)
+//@Import(FirehoseNozzleConfiguration.class)
 @Documented
 public @interface FirehoseNozzle {
     String subscriptionId();
