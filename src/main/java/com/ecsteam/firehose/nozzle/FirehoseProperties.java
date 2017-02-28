@@ -2,6 +2,7 @@ package com.ecsteam.firehose.nozzle;
 
 
 import com.ecsteam.firehose.nozzle.annotation.EnableFirehoseNozzle;
+import lombok.Getter;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -9,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.Calendar;
 
 @ToString
+@Getter
 public class FirehoseProperties {
 
     private String apiEndpoint;
