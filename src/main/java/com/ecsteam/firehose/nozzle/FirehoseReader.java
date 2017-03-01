@@ -62,12 +62,6 @@ public class FirehoseReader implements SmartLifecycle {
         FirehoseRequest request = FirehoseRequest.builder()
                 .subscriptionId(this.subscriptionId).build();
 
-        // Thanks to Ben Hale for the help with the doOnError and retry code.
-        // There is a situation where LogMessages can come through with a null
-        // message even though that's invalid according to the protobuf spec,
-        // and this causes the toEnvelope method to fail less than gracefully.
-        // This will catch those EOFExceptions and restart the Flux if/when it
-        // occurs
         dopplerClient.firehose(request)
                 .doOnError(this::receiveError)
                 .retry()
