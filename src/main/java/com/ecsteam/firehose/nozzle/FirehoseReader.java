@@ -2,6 +2,7 @@ package com.ecsteam.firehose.nozzle;
 
 import com.ecsteam.firehose.nozzle.annotation.FirehoseNozzle;
 import com.ecsteam.firehose.nozzle.annotation.OnFirehoseEvent;
+import com.ecsteam.firehose.nozzle.annotation.OnFirehoseEventError;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.cloudfoundry.doppler.Envelope;
@@ -29,7 +30,8 @@ public class FirehoseReader implements SmartLifecycle {
     private final ReactorDopplerClient dopplerClient;
     private final String subscriptionId;
     private final Object bean;
-    private Method onEventMethod;
+    private Method onEventMethod = null;
+    private Method onEventErrorMethod = null;
     private HashMap<String, EventType> eventTypes;
 
     private boolean running = false;
@@ -47,6 +49,9 @@ public class FirehoseReader implements SmartLifecycle {
 
         log.info("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") " + Calendar.getInstance().getTimeInMillis() + " **************");
         log.info("************ " + this.toString());
+        
+        eventTypes = new HashMap<String, EventType>();
+        
     }
 
     @Override
@@ -61,6 +66,58 @@ public class FirehoseReader implements SmartLifecycle {
         callback.run();
         stop();
     }
+    
+    private void checkForEventMethod(Method method) {
+    	if (method.isAnnotationPresent(OnFirehoseEvent.class)) {
+    		OnFirehoseEvent annotationInstance = method.getAnnotation(OnFirehoseEvent.class);
+    		            
+            Class[] methodParams = method.getParameterTypes();
+            if (methodParams.length != 1) {
+            	log.error("*********** incorrect number of parameters declared for onFirehoseEvent annotated method ****");
+            }
+            else {
+            	if (methodParams[0] == Envelope.class) {
+            		onEventMethod = method;
+            		log.info("************ FirehoseReader onEvent discovered! " + Calendar.getInstance().getTimeInMillis() + " **************");
+                    log.info("************ " + onEventMethod.toString());
+                    EventType[] annotatedTypes = annotationInstance.eventTypes();
+                    eventTypes = new HashMap<String, EventType>();
+                    for (EventType type : annotatedTypes) {
+                    	log.info("****** filtering on type " + type.toString() +  "*********");
+                    	eventTypes.put(type.toString(), type);
+                    }
+                    
+                    
+            	}
+            	else {
+            		log.error("*********** single parameter for onFirehoseEvent annotated method is of class " + methodParams[0].toGenericString() + " and needs to be of type Envelope  ****");
+            	}
+            	
+            }
+    	}
+    }
+    
+    private void checkForErrorMethod(Method method) {
+    	if (method.isAnnotationPresent(OnFirehoseEventError.class)) {
+    		
+            
+            Class[] methodParams = method.getParameterTypes();
+            if (methodParams.length != 1) {
+            	log.error("*********** incorrect number of parameters declared for onFirehoseEventError annotated method ****");
+            }
+            else {
+            	if (methodParams[0] == Throwable.class) {
+            		onEventErrorMethod = method;
+            		log.info("************ FirehoseReader onEventError discovered! " + Calendar.getInstance().getTimeInMillis() + " **************");
+                    log.info("************ " + onEventErrorMethod.toString());
+            	}
+            	else {
+            		log.error("*********** single parameter for onFirehoseEventError annotated method is of class " + methodParams[0].toGenericString() + " and needs to be of type Throwable  ****");
+            	}
+            	
+            }
+    	}
+    }
 
     @Override
     public void start() {
@@ -70,36 +127,8 @@ public class FirehoseReader implements SmartLifecycle {
         
         Method[] allMethods = bean.getClass().getMethods();
         for (Method method: allMethods) {
-        	if (method.isAnnotationPresent(OnFirehoseEvent.class)) {
-        		OnFirehoseEvent annotationInstance = method.getAnnotation(OnFirehoseEvent.class);
-        		
-        		
-                
-                
-                Class[] methodParams = method.getParameterTypes();
-                if (methodParams.length != 1) {
-                	log.error("*********** incorrect number of parameters declared for onFirehoseEvent annotated method ****");
-                }
-                else {
-                	if (methodParams[0] == Envelope.class) {
-                		onEventMethod = method;
-                		log.info("************ FirehoseReader onEvent discovered! " + Calendar.getInstance().getTimeInMillis() + " **************");
-                        log.info("************ " + onEventMethod.toString());
-                        EventType[] annotatedTypes = annotationInstance.eventTypes();
-                        eventTypes = new HashMap<String, EventType>();
-                        for (EventType type : annotatedTypes) {
-                        	log.info("****** filtering on type " + type.toString() +  "*********");
-                        	eventTypes.put(type.toString(), type);
-                        }
-                        
-                        
-                	}
-                	else {
-                		log.error("*********** single parameter for onFirehoseEvent annotated method is of class " + methodParams[0].toGenericString() + " and needs to be of type Envelope  ****");
-                	}
-                	
-                }
-        	}
+        	checkForEventMethod(method);
+        	checkForErrorMethod(method);
         }
         
 
@@ -111,7 +140,7 @@ public class FirehoseReader implements SmartLifecycle {
         log.info("Connecting to the Firehose");
         dopplerClient.firehose(request)
                 .doOnError(this::receiveConnectionError)
-                //.retry()
+                .retry()
                 .subscribe(this::receiveEvent, this::receiveError);
         
         log.info("Connected to the Firehose");
@@ -146,7 +175,7 @@ public class FirehoseReader implements SmartLifecycle {
         */
     	
     	
-    	if (eventTypes.containsKey(envelope.getEventType().toString())) {
+    	if ((eventTypes.containsKey(envelope.getEventType().toString())) && (onEventMethod != null)) {
 	    	try {
 				onEventMethod.invoke(bean, envelope);
 			} catch (IllegalAccessException e) {
@@ -160,17 +189,7 @@ public class FirehoseReader implements SmartLifecycle {
 				e.printStackTrace();
 			}
 	    }
-    	
-    	
 
-        /*
-        switch (envelope.getEventType()) {
-            case COUNTER_EVENT:
-            case VALUE_METRIC:
-                break;
-            default:
-        }
-        */
     }
     
     private void receiveConnectionError(Throwable error) {
@@ -181,9 +200,25 @@ public class FirehoseReader implements SmartLifecycle {
     }
 
     private void receiveError(Throwable error) {
-        log.error("Error in receiving Firehose event: {}", error.getMessage());
+        /*
+    	log.error("Error in receiving Firehose event: {}", error.getMessage());
         if (log.isDebugEnabled()) {
             error.printStackTrace();
         }
+        */
+    	if (onEventErrorMethod != null) {
+	    	try {
+				onEventErrorMethod.invoke(bean, error);
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
     }
 }
