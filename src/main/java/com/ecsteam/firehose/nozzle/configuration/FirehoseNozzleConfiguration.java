@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 
 import java.net.MalformedURLException;
@@ -38,6 +39,10 @@ public class FirehoseNozzleConfiguration {
                 .tokenProvider(tokenProvider(properties.getUsername(), properties.getPassword()))
                 .build();
     }
+    
+    private ReactorDopplerClient testDopplerClient(FirehoseProperties properties) {
+    	 return null;
+    }
 
     private String getApiHost(FirehoseProperties properties) {
         String apiHost = properties.getApiEndpoint();
@@ -52,11 +57,19 @@ public class FirehoseNozzleConfiguration {
             return apiHost;
         }
     }
-
+    
     @Bean
+    @Profile("!test")
     @Autowired
     public FirehoseReader firehoseReader(FirehoseProperties props, ApplicationContext context) {
         return new FirehoseReader(props,context, dopplerClient(props));
+    }
+
+    @Bean
+    @Profile("test")
+    @Autowired
+    public FirehoseReader testFirehoseReader(FirehoseProperties props, ApplicationContext context) {
+        return new FirehoseReader(props,context, testDopplerClient(props));
     }
 
 }

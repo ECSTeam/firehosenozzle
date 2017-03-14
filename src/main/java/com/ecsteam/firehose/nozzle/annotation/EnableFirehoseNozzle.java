@@ -11,8 +11,14 @@ import java.lang.annotation.*;
 @Import(FirehoseNozzlePropertiesConfiguration.class)
 @Documented
 public @interface EnableFirehoseNozzle {
-    String apiEndpoint() default "https://api.bosh-lite.com";
-    String username() default "admin";
-    String password() default "admin";
-    boolean skipSslValidation() default true;
+	
+	public static final String DEFAULT_API_ENDPOINT = "https://api.bosh-lite.com";
+	public static final String DEFAULT_USERNAME = "admin";
+	public static final String DEFAULT_PASSWORD = "admin";
+	public static final boolean DEFAULT_SKIP_SSL_VALIDATION = true;
+	
+    String apiEndpoint() default DEFAULT_API_ENDPOINT;
+    String username() default DEFAULT_USERNAME;
+    String password() default DEFAULT_PASSWORD;
+    boolean skipSslValidation() default DEFAULT_SKIP_SSL_VALIDATION;
 }
