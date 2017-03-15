@@ -21,6 +21,8 @@ import com.ecsteam.firehose.nozzle.FirehoseReader;
 import com.ecsteam.firehose.nozzle.annotation.application.ApplicationTest1;
 import com.ecsteam.firehose.nozzle.annotation.application.NoParamsNozzleTest;
 import com.ecsteam.firehose.nozzle.annotation.application.NoParamsOnErrorNozzleTest;
+import com.ecsteam.firehose.nozzle.annotation.application.WrongParamsNozzleTest;
+import com.ecsteam.firehose.nozzle.annotation.application.WrongParamsOnErrorNozzleTest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 // @SpringBootTest(classes = {ApplicationTest1.class, NoParamsNozzleTest.class})
@@ -55,6 +57,23 @@ public class FirehoseNozzleNoParamsTest {
 		context = SpringApplication.run(sources, args);
 
 	}
+	
+	@Test
+	public void testWrongParamsOnEvent() {
+
+		Object[] sources = new Object[2];
+		sources[0] = ApplicationTest1.class;
+		sources[1] = WrongParamsNozzleTest.class;
+
+		String[] args = new String[1];
+		args[0] = "";
+
+		thrown.expect(ApplicationContextException.class);
+		thrown.expectCause(
+				new CauseMatcher(BeanCreationException.class, FirehoseReader.UNMATCHED_PARAMS_EVENT_METHOD_MESSAGE));
+		context = SpringApplication.run(sources, args);
+
+	}
 
 	@Test
 	public void testNoParamsOnErrorEvent() {
@@ -69,6 +88,23 @@ public class FirehoseNozzleNoParamsTest {
 		thrown.expect(ApplicationContextException.class);
 		thrown.expectCause(new CauseMatcher(BeanCreationException.class,
 				FirehoseReader.INCORRECT_PARAMS_ERROR_EVENT_METHOD_MESSAGE));
+		context = SpringApplication.run(sources, args);
+
+	}
+	
+	@Test
+	public void testWrongParamsOnErrorEvent() {
+
+		Object[] sources = new Object[2];
+		sources[0] = ApplicationTest1.class;
+		sources[1] = WrongParamsOnErrorNozzleTest.class;
+
+		String[] args = new String[1];
+		args[0] = "";
+
+		thrown.expect(ApplicationContextException.class);
+		thrown.expectCause(new CauseMatcher(BeanCreationException.class,
+				FirehoseReader.UNMATCHED_PARAMS_ERROR_EVENT_METHOD_MESSAGE));
 		context = SpringApplication.run(sources, args);
 
 	}

@@ -32,7 +32,10 @@ public class FirehoseReader implements SmartLifecycle {
 	
 	public static final String INCORRECT_PARAMS_EVENT_METHOD_MESSAGE = "Incorrect number of parameters passed to OnFirehoseEvent method";
 	public static final String INCORRECT_PARAMS_ERROR_EVENT_METHOD_MESSAGE = "Incorrect number of parameters passed to OnFirehoseErrorEvent method";
+	public static final String UNMATCHED_PARAMS_EVENT_METHOD_MESSAGE = "Parameter for OnFirehoseEvent method needs to be of type Envelope";
+	public static final String UNMATCHED_PARAMS_ERROR_EVENT_METHOD_MESSAGE = "Parameters for OnFirehoseErrorEvent method needs to be of type Throwable";
 
+	
 	private final FirehoseProperties props;
 	private final ReactorDopplerClient dopplerClient;
 	private final String subscriptionId;
@@ -104,6 +107,7 @@ public class FirehoseReader implements SmartLifecycle {
 				} else {
 					log.error("*********** single parameter for onFirehoseEvent annotated method is of class "
 							+ methodParams[0].toGenericString() + " and needs to be of type Envelope  ****");
+					throw new BeanCreationException(UNMATCHED_PARAMS_EVENT_METHOD_MESSAGE);
 				}
 
 			}
@@ -130,6 +134,7 @@ public class FirehoseReader implements SmartLifecycle {
 				} else {
 					log.error("*********** single parameter for onFirehoseEventError annotated method is of class "
 							+ methodParams[0].toGenericString() + " and needs to be of type Throwable  ****");
+					throw new BeanCreationException(UNMATCHED_PARAMS_ERROR_EVENT_METHOD_MESSAGE);
 				}
 
 			}
