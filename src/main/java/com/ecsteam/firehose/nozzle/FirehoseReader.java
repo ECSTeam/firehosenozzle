@@ -31,16 +31,13 @@ import java.util.List;
 @Slf4j
 @Getter
 
-//TODO:  visit lombok for getters on this class
-
 public class FirehoseReader implements SmartLifecycle {
-	
+
 	public static final String INCORRECT_PARAMS_EVENT_METHOD_MESSAGE = "Incorrect number of parameters passed to OnFirehoseEvent method";
 	public static final String INCORRECT_PARAMS_ERROR_EVENT_METHOD_MESSAGE = "Incorrect number of parameters passed to OnFirehoseErrorEvent method";
 	public static final String UNMATCHED_PARAMS_EVENT_METHOD_MESSAGE = "Parameter for OnFirehoseEvent method needs to be of type Envelope";
 	public static final String UNMATCHED_PARAMS_ERROR_EVENT_METHOD_MESSAGE = "Parameters for OnFirehoseErrorEvent method needs to be of type Throwable";
 
-	
 	private final FirehoseProperties props;
 	private final DopplerClient dopplerClient;
 	private final String subscriptionId;
@@ -61,14 +58,13 @@ public class FirehoseReader implements SmartLifecycle {
 			FirehoseNozzle fn = context.findAnnotationOnBean(names[0], FirehoseNozzle.class);
 			this.bean = context.getBean(names[0]);
 			this.subscriptionId = fn.subscriptionId();
-	
+
 			log.debug("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
 					+ Calendar.getInstance().getTimeInMillis() + " **************");
 			log.debug("************ " + this.toString());
-	
+
 			eventTypes = new HashMap<String, EventType>();
-		}
-		else {
+		} else {
 			bean = null;
 			subscriptionId = "";
 		}
@@ -77,27 +73,25 @@ public class FirehoseReader implements SmartLifecycle {
 
 	@Override
 	public boolean isAutoStartup() {
-		
+
 		log.debug("************ FirehoseReader isAutoStartup() (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
-		
+
 		return true;
 	}
 
 	@Override
 	public void stop(Runnable callback) {
-		
+
 		log.debug("************ FirehoseReader stop(Runnable) (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
-		
+
 		callback.run();
 		stop();
 	}
 
 	private void checkForEventMethod(Method method) {
-		
-		//TODO:  if found, stop checking
-		
+
 		if (method.isAnnotationPresent(OnFirehoseEvent.class)) {
 			OnFirehoseEvent annotationInstance = method.getAnnotation(OnFirehoseEvent.class);
 
@@ -130,9 +124,7 @@ public class FirehoseReader implements SmartLifecycle {
 	}
 
 	private void checkForErrorMethod(Method method) {
-		
-		//TODO:  if found, stop checking
-		
+
 		if (method.isAnnotationPresent(OnFirehoseEventError.class)) {
 
 			Class[] methodParams = method.getParameterTypes();
@@ -165,14 +157,17 @@ public class FirehoseReader implements SmartLifecycle {
 		if (bean != null) {
 			Method[] allMethods = bean.getClass().getMethods();
 			for (Method method : allMethods) {
-				//TODO:  if found, don't check
-				checkForEventMethod(method);
-				checkForErrorMethod(method);
+				if (onEventMethod == null) {
+					checkForEventMethod(method);
+				}
+				if (onEventErrorMethod == null) {
+					checkForErrorMethod(method);
+				}
 			}
-	
+
 			log.debug("Building a Firehose Request object");
 			FirehoseRequest request = FirehoseRequest.builder().subscriptionId(this.subscriptionId).build();
-	
+
 			log.debug("Connecting to the Firehose");
 			if (dopplerClient != null) {
 				dopplerClient.firehose(request).doOnError(this::receiveConnectionError).retry()
@@ -205,25 +200,35 @@ public class FirehoseReader implements SmartLifecycle {
 	}
 
 	private void receiveEvent(Envelope envelope) {
-		/*
-		 * log.info("************ FirehoseReader receiveEvent() (" +
-		 * this.hashCode() + ") " + Calendar.getInstance().getTimeInMillis() +
-		 * " **************"); log.info(envelope.toString()); log.info(
-		 * "********************************************************************************"
-		 * );
-		 */
+
+		log.debug("************ FirehoseReader receiveEvent() (" + this.hashCode() + ") "
+				+ Calendar.getInstance().getTimeInMillis() + " **************");
+		log.debug(envelope.toString());
+		log.debug("********************************************************************************");
 
 		if ((eventTypes.containsKey(envelope.getEventType().toString())) && (onEventMethod != null)) {
 			try {
 				onEventMethod.invoke(bean, envelope);
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
+				if (bean != null) {
+					log.error("Exception invoking event method on bean " + bean.getClass().getName());
+				} else {
+					log.error("Exception invoking event method on bean, bean is null");
+				}
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
+				if (bean != null) {
+					log.error("Exception passing envelope to event method on bean " + bean.getClass().getName());
+				} else {
+					log.error("Exception passing envelope to event method on bean, bean is null");
+				}
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
+				if (bean != null) {
+					log.error("Exception invoking event method on bean " + bean.getClass().getName());
+				} else {
+					log.error("Exception invoking event method on bean, bean is null");
+				}
 				e.printStackTrace();
 			}
 		}
@@ -238,22 +243,35 @@ public class FirehoseReader implements SmartLifecycle {
 	}
 
 	private void receiveError(Throwable error) {
-		/*
-		 * log.error("Error in receiving Firehose event: {}",
-		 * error.getMessage()); if (log.isDebugEnabled()) {
-		 * error.printStackTrace(); }
-		 */
+
+		log.error("Error in receiving Firehose event: {}", error.getMessage());
+		if (log.isDebugEnabled()) {
+			error.printStackTrace();
+		}
+
 		if (onEventErrorMethod != null) {
 			try {
 				onEventErrorMethod.invoke(bean, error);
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
+				if (bean != null) {
+					log.error("Exception invoking error method on bean " + bean.getClass().getName());
+				} else {
+					log.error("Exception invoking error method on bean, bean is null");
+				}
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
+				if (bean != null) {
+					log.error("Exception passing envelope to error method on bean " + bean.getClass().getName());
+				} else {
+					log.error("Exception passing envelope to error method on bean, bean is null");
+				}
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
+				if (bean != null) {
+					log.error("Exception invoking error method on bean " + bean.getClass().getName());
+				} else {
+					log.error("Exception invoking error method on bean, bean is null");
+				}
 				e.printStackTrace();
 			}
 		}
