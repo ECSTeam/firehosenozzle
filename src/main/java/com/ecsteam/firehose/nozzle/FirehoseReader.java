@@ -59,9 +59,9 @@ public class FirehoseReader implements SmartLifecycle {
 			this.bean = context.getBean(names[0]);
 			this.subscriptionId = fn.subscriptionId();
 	
-			log.info("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
+			log.debug("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
 					+ Calendar.getInstance().getTimeInMillis() + " **************");
-			log.info("************ " + this.toString());
+			log.debug("************ " + this.toString());
 	
 			eventTypes = new HashMap<String, EventType>();
 		}
@@ -74,15 +74,19 @@ public class FirehoseReader implements SmartLifecycle {
 
 	@Override
 	public boolean isAutoStartup() {
-		log.info("************ FirehoseReader isAutoStartup() (" + this.hashCode() + ") "
+		
+		log.debug("************ FirehoseReader isAutoStartup() (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
+		
 		return true;
 	}
 
 	@Override
 	public void stop(Runnable callback) {
-		log.info("************ FirehoseReader stop(Runnable) (" + this.hashCode() + ") "
+		
+		log.debug("************ FirehoseReader stop(Runnable) (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
+		
 		callback.run();
 		stop();
 	}
@@ -102,13 +106,13 @@ public class FirehoseReader implements SmartLifecycle {
 			} else {
 				if (methodParams[0] == Envelope.class) {
 					onEventMethod = method;
-					log.info("************ FirehoseReader onEvent discovered! "
+					log.debug("************ FirehoseReader onEvent discovered! "
 							+ Calendar.getInstance().getTimeInMillis() + " **************");
-					log.info("************ " + onEventMethod.toString());
+					log.debug("************ " + onEventMethod.toString());
 					EventType[] annotatedTypes = annotationInstance.eventTypes();
 					eventTypes = new HashMap<String, EventType>();
 					for (EventType type : annotatedTypes) {
-						log.info("****** filtering on type " + type.toString() + "*********");
+						log.debug("****** filtering on type " + type.toString() + "*********");
 						eventTypes.put(type.toString(), type);
 					}
 
@@ -136,9 +140,9 @@ public class FirehoseReader implements SmartLifecycle {
 			} else {
 				if (methodParams[0] == Throwable.class) {
 					onEventErrorMethod = method;
-					log.info("************ FirehoseReader onEventError discovered! "
+					log.debug("************ FirehoseReader onEventError discovered! "
 							+ Calendar.getInstance().getTimeInMillis() + " **************");
-					log.info("************ " + onEventErrorMethod.toString());
+					log.debug("************ " + onEventErrorMethod.toString());
 				} else {
 					log.error("*********** single parameter for onFirehoseEventError annotated method is of class "
 							+ methodParams[0].toGenericString() + " and needs to be of type Throwable  ****");
@@ -151,7 +155,7 @@ public class FirehoseReader implements SmartLifecycle {
 
 	@Override
 	public void start() {
-		log.info("************ FirehoseReader start() (" + this.hashCode() + ") "
+		log.debug("************ FirehoseReader start() (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
 		running = true;
 
@@ -163,10 +167,10 @@ public class FirehoseReader implements SmartLifecycle {
 				checkForErrorMethod(method);
 			}
 	
-			log.info("Building a Firehose Request object");
+			log.debug("Building a Firehose Request object");
 			FirehoseRequest request = FirehoseRequest.builder().subscriptionId(this.subscriptionId).build();
 	
-			log.info("Connecting to the Firehose");
+			log.debug("Connecting to the Firehose");
 			if (dopplerClient != null) {
 				dopplerClient.firehose(request).doOnError(this::receiveConnectionError).retry()
 						.subscribe(this::receiveEvent, this::receiveError);
@@ -178,21 +182,21 @@ public class FirehoseReader implements SmartLifecycle {
 
 	@Override
 	public void stop() {
-		log.info("************ FirehoseReader stop() (" + this.hashCode() + ") "
+		log.debug("************ FirehoseReader stop() (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
 		running = false;
 	}
 
 	@Override
 	public boolean isRunning() {
-		log.info("************ FirehoseReader isRunning() (" + this.hashCode() + ") "
+		log.debug("************ FirehoseReader isRunning() (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
 		return running;
 	}
 
 	@Override
 	public int getPhase() {
-		log.info("************ FirehoseReader getPhase() (" + this.hashCode() + ") "
+		log.debug("************ FirehoseReader getPhase() (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
 		return 0;
 	}
