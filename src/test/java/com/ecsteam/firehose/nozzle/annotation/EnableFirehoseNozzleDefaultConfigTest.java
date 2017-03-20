@@ -15,19 +15,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.ecsteam.firehose.nozzle.FirehoseProperties;
 import com.ecsteam.firehose.nozzle.annotation.application.ApplicationTest1;
 import com.ecsteam.firehose.nozzle.configuration.FirehoseNozzlePropertiesConfiguration;
+import com.ecsteam.firehose.nozzle.mock.MockDopplerClientProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = ApplicationTest1.class)
+@SpringBootTest(classes = {ApplicationTest1.class, MockDopplerClientProvider.class})
 public class EnableFirehoseNozzleDefaultConfigTest {
 
 	@Autowired
 	ApplicationContext context;
-	
-	@BeforeClass
-	  public static void setSystemProperty() {
-	        Properties properties = System.getProperties();
-	        properties.setProperty("spring.profiles.active", "test");
-	  }
 	
 	@Test
 	public void testDefaultAnnotation() {

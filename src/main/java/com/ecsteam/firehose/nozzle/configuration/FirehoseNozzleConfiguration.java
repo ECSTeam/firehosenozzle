@@ -2,7 +2,6 @@ package com.ecsteam.firehose.nozzle.configuration;
 
 import com.ecsteam.firehose.nozzle.FirehoseProperties;
 import com.ecsteam.firehose.nozzle.FirehoseReader;
-import com.ecsteam.firehose.nozzle.mock.MockDopplerClient;
 
 import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
@@ -43,9 +42,6 @@ public class FirehoseNozzleConfiguration {
                 .build();
     }
     
-    private DopplerClient testDopplerClient(FirehoseProperties properties) {
-    	 return new MockDopplerClient();
-    }
 
     private String getApiHost(FirehoseProperties properties) {
         String apiHost = properties.getApiEndpoint();
@@ -62,17 +58,10 @@ public class FirehoseNozzleConfiguration {
     }
     
     @Bean
-    @Profile("!test")
     @Autowired
     public FirehoseReader firehoseReader(FirehoseProperties props, ApplicationContext context) {
         return new FirehoseReader(props,context, dopplerClient(props));
     }
 
-    @Bean
-    @Profile("test")
-    @Autowired
-    public FirehoseReader testFirehoseReader(FirehoseProperties props, ApplicationContext context) {
-        return new FirehoseReader(props,context, testDopplerClient(props));
-    }
 
 }

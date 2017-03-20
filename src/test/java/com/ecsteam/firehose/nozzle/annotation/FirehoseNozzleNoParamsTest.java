@@ -23,6 +23,7 @@ import com.ecsteam.firehose.nozzle.annotation.application.NoParamsNozzleTest;
 import com.ecsteam.firehose.nozzle.annotation.application.NoParamsOnErrorNozzleTest;
 import com.ecsteam.firehose.nozzle.annotation.application.WrongParamsNozzleTest;
 import com.ecsteam.firehose.nozzle.annotation.application.WrongParamsOnErrorNozzleTest;
+import com.ecsteam.firehose.nozzle.mock.MockDopplerClientProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 // @SpringBootTest(classes = {ApplicationTest1.class, NoParamsNozzleTest.class})
@@ -44,9 +45,10 @@ public class FirehoseNozzleNoParamsTest {
 	@Test
 	public void testNoParamsOnEvent() {
 
-		Object[] sources = new Object[2];
+		Object[] sources = new Object[3];
 		sources[0] = ApplicationTest1.class;
 		sources[1] = NoParamsNozzleTest.class;
+		sources[2] = MockDopplerClientProvider.class;
 
 		String[] args = new String[1];
 		args[0] = "";
@@ -61,9 +63,10 @@ public class FirehoseNozzleNoParamsTest {
 	@Test
 	public void testWrongParamsOnEvent() {
 
-		Object[] sources = new Object[2];
+		Object[] sources = new Object[3];
 		sources[0] = ApplicationTest1.class;
 		sources[1] = WrongParamsNozzleTest.class;
+		sources[2] = MockDopplerClientProvider.class;
 
 		String[] args = new String[1];
 		args[0] = "";
@@ -78,9 +81,10 @@ public class FirehoseNozzleNoParamsTest {
 	@Test
 	public void testNoParamsOnErrorEvent() {
 
-		Object[] sources = new Object[2];
+		Object[] sources = new Object[3];
 		sources[0] = ApplicationTest1.class;
 		sources[1] = NoParamsOnErrorNozzleTest.class;
+		sources[2] = MockDopplerClientProvider.class;
 
 		String[] args = new String[1];
 		args[0] = "";
@@ -95,9 +99,10 @@ public class FirehoseNozzleNoParamsTest {
 	@Test
 	public void testWrongParamsOnErrorEvent() {
 
-		Object[] sources = new Object[2];
+		Object[] sources = new Object[3];
 		sources[0] = ApplicationTest1.class;
 		sources[1] = WrongParamsOnErrorNozzleTest.class;
+		sources[2] = MockDopplerClientProvider.class;
 
 		String[] args = new String[1];
 		args[0] = "";

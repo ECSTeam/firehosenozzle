@@ -13,25 +13,22 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ecsteam.firehose.nozzle.FirehoseReader;
 import com.ecsteam.firehose.nozzle.annotation.application.ApplicationTest1;
 import com.ecsteam.firehose.nozzle.annotation.application.NozzleTest1;
 import com.ecsteam.firehose.nozzle.configuration.FirehoseNozzleConfiguration;
+import com.ecsteam.firehose.nozzle.mock.MockDopplerClientProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {ApplicationTest1.class, NozzleTest1.class})
-public class FiehoseNozzleHappyPathTest {
+@SpringBootTest(classes = {ApplicationTest1.class, NozzleTest1.class, MockDopplerClientProvider.class})
+public class FirehoseNozzleHappyPathTest {
 
 	@Autowired
 	ApplicationContext context;
-	
-	@BeforeClass
-	  public static void setSystemProperty() {
-	        Properties properties = System.getProperties();
-	        properties.setProperty("spring.profiles.active", "test");
-	  }
+
 	
 	@Test
 	public void testDefaultAnnotation() {
@@ -73,3 +70,5 @@ public class FiehoseNozzleHappyPathTest {
 	}
 	
 }
+
+

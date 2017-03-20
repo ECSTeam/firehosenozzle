@@ -12,9 +12,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.ecsteam.firehose.nozzle.FirehoseProperties;
 import com.ecsteam.firehose.nozzle.annotation.application.ApplicationTest2;
 import com.ecsteam.firehose.nozzle.configuration.FirehoseNozzlePropertiesConfiguration;
+import com.ecsteam.firehose.nozzle.mock.MockDopplerClientProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = ApplicationTest2.class)
+@SpringBootTest(classes = {ApplicationTest2.class, MockDopplerClientProvider.class})
 public class EnableFirehoseNozzleParameterizedConfigTest {
 	
 	@Autowired

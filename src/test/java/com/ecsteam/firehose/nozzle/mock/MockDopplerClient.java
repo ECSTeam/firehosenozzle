@@ -15,7 +15,6 @@ public class MockDopplerClient implements DopplerClient {
 
 	@Override
 	public Flux<Envelope> containerMetrics(ContainerMetricsRequest arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -40,13 +39,11 @@ public class MockDopplerClient implements DopplerClient {
 
 	@Override
 	public Flux<Envelope> recentLogs(RecentLogsRequest arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Flux<Envelope> stream(StreamRequest arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

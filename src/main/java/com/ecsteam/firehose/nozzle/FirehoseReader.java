@@ -54,15 +54,21 @@ public class FirehoseReader implements SmartLifecycle {
 		this.dopplerClient = dopplerClient;
 
 		String[] names = context.getBeanNamesForAnnotation(FirehoseNozzle.class);
-		FirehoseNozzle fn = context.findAnnotationOnBean(names[0], FirehoseNozzle.class);
-		this.bean = context.getBean(names[0]);
-		this.subscriptionId = fn.subscriptionId();
-
-		log.info("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
-				+ Calendar.getInstance().getTimeInMillis() + " **************");
-		log.info("************ " + this.toString());
-
-		eventTypes = new HashMap<String, EventType>();
+		if (names.length == 1) {
+			FirehoseNozzle fn = context.findAnnotationOnBean(names[0], FirehoseNozzle.class);
+			this.bean = context.getBean(names[0]);
+			this.subscriptionId = fn.subscriptionId();
+	
+			log.info("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
+					+ Calendar.getInstance().getTimeInMillis() + " **************");
+			log.info("************ " + this.toString());
+	
+			eventTypes = new HashMap<String, EventType>();
+		}
+		else {
+			bean = null;
+			subscriptionId = "";
+		}
 
 	}
 
@@ -149,21 +155,23 @@ public class FirehoseReader implements SmartLifecycle {
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
 		running = true;
 
-		Method[] allMethods = bean.getClass().getMethods();
-		for (Method method : allMethods) {
-			//TODO:  if found, don't check
-			checkForEventMethod(method);
-			checkForErrorMethod(method);
-		}
-
-		log.info("Building a Firehose Request object");
-		FirehoseRequest request = FirehoseRequest.builder().subscriptionId(this.subscriptionId).build();
-
-		log.info("Connecting to the Firehose");
-		if (dopplerClient != null) {
-			dopplerClient.firehose(request).doOnError(this::receiveConnectionError).retry()
-					.subscribe(this::receiveEvent, this::receiveError);
-			log.info("Connected to the Firehose");
+		if (bean != null) {
+			Method[] allMethods = bean.getClass().getMethods();
+			for (Method method : allMethods) {
+				//TODO:  if found, don't check
+				checkForEventMethod(method);
+				checkForErrorMethod(method);
+			}
+	
+			log.info("Building a Firehose Request object");
+			FirehoseRequest request = FirehoseRequest.builder().subscriptionId(this.subscriptionId).build();
+	
+			log.info("Connecting to the Firehose");
+			if (dopplerClient != null) {
+				dopplerClient.firehose(request).doOnError(this::receiveConnectionError).retry()
+						.subscribe(this::receiveEvent, this::receiveError);
+				log.info("Connected to the Firehose");
+			}
 		}
 
 	}
