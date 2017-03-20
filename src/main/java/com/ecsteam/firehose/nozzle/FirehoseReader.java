@@ -5,6 +5,8 @@ import com.ecsteam.firehose.nozzle.annotation.OnFirehoseEvent;
 import com.ecsteam.firehose.nozzle.annotation.OnFirehoseEventError;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
+import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.EventType;
 import org.cloudfoundry.doppler.FirehoseRequest;
@@ -37,7 +39,7 @@ public class FirehoseReader implements SmartLifecycle {
 
 	
 	private final FirehoseProperties props;
-	private final ReactorDopplerClient dopplerClient;
+	private final DopplerClient dopplerClient;
 	private final String subscriptionId;
 	private final Object bean;
 	private Method onEventMethod = null;
@@ -47,7 +49,7 @@ public class FirehoseReader implements SmartLifecycle {
 	private boolean running = false;
 
 	@Autowired
-	public FirehoseReader(FirehoseProperties props, ApplicationContext context, ReactorDopplerClient dopplerClient) {
+	public FirehoseReader(FirehoseProperties props, ApplicationContext context, DopplerClient dopplerClient) {
 		this.props = props;
 		this.dopplerClient = dopplerClient;
 

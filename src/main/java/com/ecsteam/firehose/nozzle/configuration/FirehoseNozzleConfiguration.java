@@ -2,6 +2,9 @@ package com.ecsteam.firehose.nozzle.configuration;
 
 import com.ecsteam.firehose.nozzle.FirehoseProperties;
 import com.ecsteam.firehose.nozzle.FirehoseReader;
+import com.ecsteam.firehose.nozzle.mock.MockDopplerClient;
+
+import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
@@ -33,15 +36,15 @@ public class FirehoseNozzleConfiguration {
                 .build();
     }
 
-    private ReactorDopplerClient dopplerClient(FirehoseProperties properties) {
+    private DopplerClient dopplerClient(FirehoseProperties properties) {
         return ReactorDopplerClient.builder()
                 .connectionContext(connectionContext(getApiHost(properties), properties.isSkipSslValidation()))
                 .tokenProvider(tokenProvider(properties.getUsername(), properties.getPassword()))
                 .build();
     }
     
-    private ReactorDopplerClient testDopplerClient(FirehoseProperties properties) {
-    	 return null;
+    private DopplerClient testDopplerClient(FirehoseProperties properties) {
+    	 return new MockDopplerClient();
     }
 
     private String getApiHost(FirehoseProperties properties) {

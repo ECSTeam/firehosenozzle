@@ -64,6 +64,11 @@ public class FiehoseNozzleHappyPathTest {
 		Class[] errorParams = errorMethod.getParameterTypes();
 		assertTrue(errorParams[0] == Throwable.class);
 		
+		NozzleTest1 nozzleTest = (NozzleTest1)nozzleBean;
+		assertNotNull(nozzleTest);
+		
+		assertTrue(nozzleTest.didGetCounterEvent());
+		assertFalse(nozzleTest.didGetValueMetric());
 		
 	}
 	
