@@ -3,6 +3,8 @@ package com.ecsteam.firehose.nozzle;
 import com.ecsteam.firehose.nozzle.annotation.FirehoseNozzle;
 import com.ecsteam.firehose.nozzle.annotation.OnFirehoseEvent;
 import com.ecsteam.firehose.nozzle.annotation.OnFirehoseEventError;
+
+import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +29,7 @@ import java.util.List;
 @ToString
 @Service
 @Slf4j
+@Getter
 
 //TODO:  visit lombok for getters on this class
 
@@ -255,17 +258,5 @@ public class FirehoseReader implements SmartLifecycle {
 			}
 		}
 	}
-	
-	public Method getEventMethod() {
-		return this.onEventMethod;
 
-	}
-	
-	public Method getEventErrorMethod() {
-		return this.onEventErrorMethod;
-	}
-	
-	public Object getNozzleBean() {
-		return this.bean;
-	}
 }

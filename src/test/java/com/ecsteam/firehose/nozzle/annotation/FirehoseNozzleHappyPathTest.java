@@ -42,19 +42,19 @@ public class FirehoseNozzleHappyPathTest {
 		
 		assertNotNull(reader);		
 		
-		Object nozzleBean = reader.getNozzleBean();
+		Object nozzleBean = reader.getBean();
 		assertNotNull(nozzleBean);
 		
 		assertTrue(nozzleBean instanceof NozzleTest1);
 		
-		Method eventMethod = reader.getEventMethod();
+		Method eventMethod = reader.getOnEventMethod(); 
 		assertNotNull(eventMethod);
 		assertTrue(eventMethod.getName().equalsIgnoreCase("onEvent"));
 		assertTrue(eventMethod.getParameterCount() == 1);
 		Class[] params = eventMethod.getParameterTypes();
 		assertTrue(params[0] == Envelope.class);
 		
-		Method errorMethod = reader.getEventErrorMethod();
+		Method errorMethod = reader.getOnEventErrorMethod();
 		assertNotNull(errorMethod);
 		assertTrue(errorMethod.getName().equalsIgnoreCase("onEventError"));
 		assertTrue(errorMethod.getParameterCount() == 1);
