@@ -1,7 +1,10 @@
 package com.ecsteam.firehose.nozzle.annotation;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,22 +19,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.ecsteam.firehose.nozzle.FirehoseProperties;
 import com.ecsteam.firehose.nozzle.FirehoseReader;
 import com.ecsteam.firehose.nozzle.annotation.application.ApplicationTest1;
+import com.ecsteam.firehose.nozzle.annotation.application.NozzleTest1;
+import com.ecsteam.firehose.nozzle.annotation.application.NozzleTest2;
 import com.ecsteam.firehose.nozzle.configuration.FirehoseNozzlePropertiesConfiguration;
 
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {ApplicationTest1.class})
-public class EnableFirehoseNozzleDefaultConfigTest {
-
+@SpringBootTest(classes = {ApplicationTest1.class, NozzleTest1.class, NozzleTest2.class})
+public class FirehoseNozzleMultipleAnnotationsTest {
+	
 	@Autowired
 	ApplicationContext context;
 	
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-	
 	@Test
-	public void testDefaultAnnotation() {
-		
+	public void testMultipleAnnotations() {
 		assertNotNull(context);
 		FirehoseNozzlePropertiesConfiguration config = (FirehoseNozzlePropertiesConfiguration)context.getBean(FirehoseNozzlePropertiesConfiguration.class);
 		
@@ -47,9 +47,10 @@ public class EnableFirehoseNozzleDefaultConfigTest {
 		assertEquals(props.isSkipSslValidation(), EnableFirehoseNozzle.DEFAULT_SKIP_SSL_VALIDATION);
 		
 		assertTrue(props.isValidConfiguration());
-		
-		thrown.expect(NoSuchBeanDefinitionException.class);
+
 		FirehoseReader reader = (FirehoseReader)context.getBean(FirehoseReader.class);
+		
+		assertNull(reader);
 		
 	}
 	

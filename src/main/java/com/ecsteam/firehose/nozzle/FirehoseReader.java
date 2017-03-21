@@ -47,24 +47,53 @@ public class FirehoseReader implements SmartLifecycle {
 	private HashMap<String, EventType> eventTypes;
 
 	private boolean running = false;
+	private boolean isValid = false;
 
 	@Autowired
 	public FirehoseReader(FirehoseProperties props, ApplicationContext context, DopplerClient dopplerClient) {
+		
+		log.debug("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
+				+ Calendar.getInstance().getTimeInMillis() + " **************");
+		log.debug("************ " + this.toString());
+		
 		this.props = props;
 		this.dopplerClient = dopplerClient;
 
-		String[] names = context.getBeanNamesForAnnotation(FirehoseNozzle.class);
-		if (names.length == 1) {
-			FirehoseNozzle fn = context.findAnnotationOnBean(names[0], FirehoseNozzle.class);
-			this.bean = context.getBean(names[0]);
-			this.subscriptionId = fn.subscriptionId();
-
-			log.debug("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
-					+ Calendar.getInstance().getTimeInMillis() + " **************");
-			log.debug("************ " + this.toString());
-
-			eventTypes = new HashMap<String, EventType>();
-		} else {
+		if (props != null && props.isValidConfiguration()) {
+			String[] names = context.getBeanNamesForAnnotation(FirehoseNozzle.class);
+			if (names.length == 1) {
+				FirehoseNozzle fn = context.findAnnotationOnBean(names[0], FirehoseNozzle.class);
+				this.bean = context.getBean(names[0]);
+				this.subscriptionId = fn.subscriptionId();
+	
+				log.debug("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
+						+ Calendar.getInstance().getTimeInMillis() + " **************");
+				log.debug("************ " + this.toString());
+	
+				eventTypes = new HashMap<String, EventType>();
+				
+				isValid = true;
+			}
+			else if (names.length > 1) {
+				log.error("****************************************");
+				log.error("Cannot instantiate FirehoseReader class as there are multiple beans with the FirehoseNozzle annotation");
+				for (String name : names) {
+					log.error(name);
+				}
+				bean = null;
+				subscriptionId = "";
+			}
+			else {
+				log.error("****************************************");
+				log.error("Cannot instantiate FirehoseReader class as there are no beans with the FirehoseNozzle annotation");
+				
+				bean = null;
+				subscriptionId = "";
+			}
+		}
+		else {
+			log.error("****************************************");
+			log.error("Cannot instantiate FirehoseReader class as current property set is invalid.  Do you have a class with the EnableFirehose annotation?");
 			bean = null;
 			subscriptionId = "";
 		}
@@ -154,7 +183,7 @@ public class FirehoseReader implements SmartLifecycle {
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
 		running = true;
 
-		if (bean != null) {
+		if (bean != null && isValid) {
 			Method[] allMethods = bean.getClass().getMethods();
 			for (Method method : allMethods) {
 				if (onEventMethod == null) {

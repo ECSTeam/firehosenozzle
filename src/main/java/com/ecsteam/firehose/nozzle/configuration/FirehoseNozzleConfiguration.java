@@ -2,6 +2,9 @@ package com.ecsteam.firehose.nozzle.configuration;
 
 import com.ecsteam.firehose.nozzle.FirehoseProperties;
 import com.ecsteam.firehose.nozzle.FirehoseReader;
+import com.ecsteam.firehose.nozzle.annotation.FirehoseNozzle;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
@@ -19,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 @Configuration
+@Slf4j
 public class FirehoseNozzleConfiguration {
 
     private DefaultConnectionContext connectionContext(String apiHost, Boolean skipSslValidation) {
@@ -60,7 +64,27 @@ public class FirehoseNozzleConfiguration {
     @Bean
     @Autowired
     public FirehoseReader firehoseReader(FirehoseProperties props, ApplicationContext context) {
-        return new FirehoseReader(props,context, dopplerClient(props));
+    	
+    	log.info("in the firehose reader bean method");
+    	String[] names = context.getBeanNamesForAnnotation(FirehoseNozzle.class);
+		if (names.length == 1) {
+			return new FirehoseReader(props,context, dopplerClient(props));
+		}
+		else if (names.length > 1) {
+			log.error("****************************************");
+			log.error("Cannot instantiate FirehoseReader class as there are multiple beans with the FirehoseNozzle annotation");
+			for (String name : names) {
+				log.error(name);
+			}
+			
+			return null;
+		}
+		else {
+			log.error("****************************************");
+			log.error("Cannot instantiate FirehoseReader class as there are no beans with the FirehoseNozzle annotation");
+			
+			return null;
+		}
     }
 
 
