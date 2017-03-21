@@ -1,0 +1,15 @@
+{
+	"name":"$serviceName",
+	"label":"",
+	"plan":"",
+	"tags":["firehose"],
+	"credentials":{
+		"name": "$name",
+		"serviceType": "$serviceType",
+		"subscriptionId": "$subId",
+		"username": "testuser",
+		"password": "testcreds",
+		"apiEndpoint": "http://$hostname",
+		"skipSslValidation": true
+	}
+}
