@@ -3,6 +3,7 @@ package com.ecsteam.firehose.nozzle;
 import com.ecsteam.firehose.nozzle.annotation.FirehoseNozzle;
 import com.ecsteam.firehose.nozzle.annotation.OnFirehoseEvent;
 import com.ecsteam.firehose.nozzle.annotation.OnFirehoseEventError;
+import com.ecsteam.firehose.nozzle.serviceinfo.FirehoseConnectorServiceInfo;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -14,6 +15,9 @@ import org.cloudfoundry.doppler.EventType;
 import org.cloudfoundry.doppler.FirehoseRequest;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.Cloud;
+import org.springframework.cloud.CloudFactory;
+import org.springframework.cloud.service.ServiceInfo;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.SmartLifecycle;
@@ -51,11 +55,11 @@ public class FirehoseReader implements SmartLifecycle {
 
 	@Autowired
 	public FirehoseReader(FirehoseProperties props, ApplicationContext context, DopplerClient dopplerClient) {
-		
+
 		log.debug("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
 		log.debug("************ " + this.toString());
-		
+
 		this.props = props;
 		this.dopplerClient = dopplerClient;
 
@@ -64,36 +68,36 @@ public class FirehoseReader implements SmartLifecycle {
 			if (names.length == 1) {
 				FirehoseNozzle fn = context.findAnnotationOnBean(names[0], FirehoseNozzle.class);
 				this.bean = context.getBean(names[0]);
-				this.subscriptionId = fn.subscriptionId();
-	
+				this.subscriptionId = getSubscriptionId(fn);
+
 				log.debug("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
 						+ Calendar.getInstance().getTimeInMillis() + " **************");
 				log.debug("************ " + this.toString());
-	
+
 				eventTypes = new HashMap<String, EventType>();
-				
+
 				isValid = true;
-			}
-			else if (names.length > 1) {
+			} else if (names.length > 1) {
 				log.error("****************************************");
-				log.error("Cannot instantiate FirehoseReader class as there are multiple beans with the FirehoseNozzle annotation");
+				log.error(
+						"Cannot instantiate FirehoseReader class as there are multiple beans with the FirehoseNozzle annotation");
 				for (String name : names) {
 					log.error(name);
 				}
 				bean = null;
 				subscriptionId = "";
-			}
-			else {
+			} else {
 				log.error("****************************************");
-				log.error("Cannot instantiate FirehoseReader class as there are no beans with the FirehoseNozzle annotation");
-				
+				log.error(
+						"Cannot instantiate FirehoseReader class as there are no beans with the FirehoseNozzle annotation");
+
 				bean = null;
 				subscriptionId = "";
 			}
-		}
-		else {
+		} else {
 			log.error("****************************************");
-			log.error("Cannot instantiate FirehoseReader class as current property set is invalid.  Do you have a class with the EnableFirehose annotation?");
+			log.error(
+					"Cannot instantiate FirehoseReader class as current property set is invalid.  Do you have a class with the EnableFirehose annotation?");
 			bean = null;
 			subscriptionId = "";
 		}
@@ -304,6 +308,42 @@ public class FirehoseReader implements SmartLifecycle {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private String getSubscriptionId(FirehoseNozzle fn) {
+		String subscriptionId = "";
+		FirehoseConnectorServiceInfo fcSI = getFirehoseConnectorServiceInfo();
+		if (fcSI != null) {
+			subscriptionId = fcSI.getSubscriptionId();
+		} else if (fn != null) {
+			subscriptionId = fn.subscriptionId();
+		} else {
+			subscriptionId = "";
+		}
+		return subscriptionId;
+	}
+
+	private Cloud getCloud() {
+		try {
+			CloudFactory cloudFactory = new CloudFactory();
+			return cloudFactory.getCloud();
+		} catch (org.springframework.cloud.CloudException ce) {
+			return null;
+		}
+	}
+
+	private FirehoseConnectorServiceInfo getFirehoseConnectorServiceInfo() {
+
+		Cloud cloud = getCloud();
+		if (cloud != null) {
+			List<ServiceInfo> serviceInfos = cloud.getServiceInfos();
+			for (ServiceInfo serviceInfo : serviceInfos) {
+				if (serviceInfo instanceof FirehoseConnectorServiceInfo) {
+					return (FirehoseConnectorServiceInfo) serviceInfo;
+				}
+			}
+		}
+		return null;
 	}
 
 }
