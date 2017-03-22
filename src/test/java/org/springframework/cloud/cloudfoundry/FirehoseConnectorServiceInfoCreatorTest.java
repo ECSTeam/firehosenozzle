@@ -1,9 +1,9 @@
 package org.springframework.cloud.cloudfoundry;
 
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,13 +15,16 @@ import java.util.Map;
 import java.util.Scanner;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.cloud.cloudfoundry.CloudFoundryConnector;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cloud.service.ServiceInfo;
 import org.springframework.cloud.util.EnvironmentAccessor;
+import org.springframework.context.ApplicationContext;
 
 import com.ecsteam.firehose.nozzle.serviceinfo.FirehoseConnectorServiceInfo;
 
@@ -33,6 +36,12 @@ public class FirehoseConnectorServiceInfoCreatorTest {
 	
 	@Mock
 	protected EnvironmentAccessor mockEnvironment;
+	
+	@Autowired
+	ApplicationContext context;
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Before
 	public void setup() {
@@ -158,6 +167,7 @@ public class FirehoseConnectorServiceInfoCreatorTest {
 		List<ServiceInfo> serviceInfos = testCloudConnector.getServiceInfos();
 		
 		assertServiceFoundOfType(serviceInfos, "testService", FirehoseConnectorServiceInfo.class);
+		
 	}
 
 }

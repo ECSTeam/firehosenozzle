@@ -1,15 +1,21 @@
 package com.ecsteam.firehose.nozzle;
 
 
+import java.util.Calendar;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.Cloud;
+import org.springframework.cloud.CloudFactory;
+import org.springframework.cloud.service.ServiceInfo;
+import org.springframework.context.ApplicationContext;
+
 import com.ecsteam.firehose.nozzle.annotation.EnableFirehoseNozzle;
+import com.ecsteam.firehose.nozzle.serviceinfo.FirehoseConnectorServiceInfo;
+
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-
-import java.util.Calendar;
 
 @ToString
 @Getter
@@ -31,14 +37,28 @@ public class FirehoseProperties {
     @Autowired
     public FirehoseProperties(ApplicationContext context) {
     	
+    	log.debug("************** In the Firehose Properties Constructor **************");
     	
         String[] names = context.getBeanNamesForAnnotation(EnableFirehoseNozzle.class);
         if (names.length == 1) {
-	        EnableFirehoseNozzle efh = context.findAnnotationOnBean(names[0],EnableFirehoseNozzle.class);
-	        this.apiEndpoint = efh.apiEndpoint();
-	        this.username = efh.username();
-	        this.password = efh.password();
-	        this.skipSslValidation = efh.skipSslValidation();
+        	FirehoseConnectorServiceInfo serviceInfo = getFirehoseConnectorServiceInfo();
+        	if (serviceInfo == null) {
+        		log.info("***********************************************************");
+        		log.info("Constructing FirehoseProperties using annotation attributes or defaults");
+		        EnableFirehoseNozzle efh = context.findAnnotationOnBean(names[0],EnableFirehoseNozzle.class);
+		        this.apiEndpoint = efh.apiEndpoint();
+		        this.username = efh.username();
+		        this.password = efh.password();
+		        this.skipSslValidation = efh.skipSslValidation();
+        	}
+        	else {
+        		log.info("***********************************************************");
+        		log.info("Constructing FirehoseProperties using bound service credentials");
+        		this.apiEndpoint = serviceInfo.getApiEndpoint();
+        		this.username = serviceInfo.getUsername();
+        		this.password = serviceInfo.getPassword();
+        		this.skipSslValidation = serviceInfo.isSkipSslValidation();
+        	}
 	
 	        log.info("************ FirehoseProperties CONSTRUCTED! " + Calendar.getInstance().getTimeInMillis() + " **************");
 	        log.info("************ " + this.toString());
@@ -55,6 +75,30 @@ public class FirehoseProperties {
         	log.info("EnableFirehoseNozzle library on path yet no beans found with EnableFirehoseNozzle annotation");
         	setNoValues();
         }
+    }
+    
+    private Cloud getCloud() {
+        try {
+            CloudFactory cloudFactory = new CloudFactory();
+            return cloudFactory.getCloud();
+        } catch (org.springframework.cloud.CloudException ce) {
+            return null;
+        }
+    }
+    
+    private FirehoseConnectorServiceInfo getFirehoseConnectorServiceInfo() {
+
+    	
+    	Cloud cloud = getCloud();
+    	if (cloud != null) {
+    		List<ServiceInfo> serviceInfos = cloud.getServiceInfos();
+    		for (ServiceInfo serviceInfo : serviceInfos) {
+    			if (serviceInfo instanceof FirehoseConnectorServiceInfo) {
+    				return (FirehoseConnectorServiceInfo)serviceInfo;
+    			}
+    		}
+    	}
+    	return null;
     }
     
     private void setNoValues () {
