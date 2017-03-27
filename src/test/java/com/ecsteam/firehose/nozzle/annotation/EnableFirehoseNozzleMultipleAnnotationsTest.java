@@ -4,12 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ecsteam.firehose.nozzle.FirehoseProperties;
@@ -41,7 +45,7 @@ public class EnableFirehoseNozzleMultipleAnnotationsTest {
 		assertEquals(props.getApiEndpoint(), FirehoseProperties.NO_ENDPOINT_USED);
 		assertEquals(props.getUsername(), FirehoseProperties.NO_USERNAME_USED);
 		assertEquals(props.getPassword(), FirehoseProperties.NO_PASSWORD_USED);
-		assertEquals(props.isSkipSslValidation(), FirehoseProperties.NO_SKIP_SSL_USED);
+		assertEquals(props.isSkipSslValidation(), new Boolean(FirehoseProperties.NO_SKIP_SSL_USED).booleanValue());
 		
 		
 		assertFalse(props.isValidConfiguration());

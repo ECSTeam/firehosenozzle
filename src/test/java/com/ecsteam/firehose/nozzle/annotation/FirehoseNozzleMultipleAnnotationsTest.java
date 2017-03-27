@@ -1,16 +1,12 @@
 package com.ecsteam.firehose.nozzle.annotation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -44,7 +40,7 @@ public class FirehoseNozzleMultipleAnnotationsTest {
 		assertEquals(props.getApiEndpoint(), EnableFirehoseNozzle.DEFAULT_API_ENDPOINT);
 		assertEquals(props.getUsername(), EnableFirehoseNozzle.DEFAULT_USERNAME);
 		assertEquals(props.getPassword(), EnableFirehoseNozzle.DEFAULT_PASSWORD);
-		assertEquals(props.isSkipSslValidation(), EnableFirehoseNozzle.DEFAULT_SKIP_SSL_VALIDATION);
+		assertEquals(props.isSkipSslValidation(), new Boolean(EnableFirehoseNozzle.DEFAULT_SKIP_SSL_VALIDATION).booleanValue());
 		
 		assertTrue(props.isValidConfiguration());
 

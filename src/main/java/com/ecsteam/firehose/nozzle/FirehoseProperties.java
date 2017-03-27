@@ -9,6 +9,7 @@ import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.service.ServiceInfo;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 
 import com.ecsteam.firehose.nozzle.annotation.EnableFirehoseNozzle;
 import com.ecsteam.firehose.nozzle.serviceinfo.FirehoseConnectorServiceInfo;
@@ -21,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Slf4j
 public class FirehoseProperties {
+	
+	private ApplicationContext context;
 
     private String apiEndpoint;
     private String username;
@@ -37,6 +40,8 @@ public class FirehoseProperties {
     @Autowired
     public FirehoseProperties(ApplicationContext context) {
     	
+    	this.context = context;
+    	
     	log.debug("************** In the Firehose Properties Constructor **************");
     	
         String[] names = context.getBeanNamesForAnnotation(EnableFirehoseNozzle.class);
@@ -46,10 +51,17 @@ public class FirehoseProperties {
         		log.info("***********************************************************");
         		log.info("Constructing FirehoseProperties using annotation attributes or defaults");
 		        EnableFirehoseNozzle efh = context.findAnnotationOnBean(names[0],EnableFirehoseNozzle.class);
-		        this.apiEndpoint = efh.apiEndpoint();
-		        this.username = efh.username();
-		        this.password = efh.password();
-		        this.skipSslValidation = efh.skipSslValidation();
+		        this.apiEndpoint = substituteProperties(efh.apiEndpoint());
+		        this.username = substituteProperties(efh.username());
+		        this.password = substituteProperties(efh.password());
+		        // if the annotation value == "true", use the value.  otherwise, set it to false.
+		        // this will handle bad string value inputs.
+		        if (Boolean.TRUE.toString().equalsIgnoreCase(substituteProperties(efh.skipSslValidation()))) {
+		        	this.skipSslValidation = true;
+		        }
+		        else {
+		        	this.skipSslValidation = false;
+		        }
         	}
         	else {
         		log.info("***********************************************************");
@@ -84,6 +96,10 @@ public class FirehoseProperties {
         } catch (org.springframework.cloud.CloudException ce) {
             return null;
         }
+    }
+    
+    private String substituteProperties(String input) {
+    	return context.getEnvironment().resolvePlaceholders(input);
     }
     
     private FirehoseConnectorServiceInfo getFirehoseConnectorServiceInfo() {

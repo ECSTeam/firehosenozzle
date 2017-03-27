@@ -1,19 +1,17 @@
 package com.ecsteam.firehose.nozzle.annotation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Properties;
 
 import org.cloudfoundry.doppler.Envelope;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ecsteam.firehose.nozzle.FirehoseReader;
@@ -28,7 +26,6 @@ public class FirehoseNozzleHappyPathTest {
 
 	@Autowired
 	ApplicationContext context;
-
 	
 	@Test
 	public void testDefaultAnnotation() {

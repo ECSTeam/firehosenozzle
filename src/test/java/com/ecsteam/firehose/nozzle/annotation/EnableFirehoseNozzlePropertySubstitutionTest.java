@@ -1,6 +1,12 @@
 package com.ecsteam.firehose.nozzle.annotation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
+import java.util.Properties;
+
 import static org.mockito.Mockito.mock;
 
 import org.junit.BeforeClass;
@@ -18,22 +24,30 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ecsteam.firehose.nozzle.FirehoseProperties;
 import com.ecsteam.firehose.nozzle.FirehoseReader;
-import com.ecsteam.firehose.nozzle.annotation.application.ApplicationTest1;
+import com.ecsteam.firehose.nozzle.annotation.application.ApplicationTest4;
 import com.ecsteam.firehose.nozzle.configuration.FirehoseNozzlePropertiesConfiguration;
 
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {ApplicationTest1.class})
-public class EnableFirehoseNozzleDefaultConfigTest {
-
+@SpringBootTest(classes = {ApplicationTest4.class})
+public class EnableFirehoseNozzlePropertySubstitutionTest {
 	@Autowired
 	ApplicationContext context;
 	
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 	
+	// this will get the class to load the application-test.properties file
+	// in the test/resources directory
+	
+	@BeforeClass
+	public static void setSystemProperty() {
+		Properties properties = System.getProperties();
+		properties.setProperty("spring.profiles.active", "test");
+
+	}
+	
 	@Test
-	public void testDefaultAnnotation() {
+	public void testAnnotationPropertySubstitutions() {
 		
 		assertNotNull(context);
 		FirehoseNozzlePropertiesConfiguration config = (FirehoseNozzlePropertiesConfiguration)context.getBean(FirehoseNozzlePropertiesConfiguration.class);
@@ -44,10 +58,10 @@ public class EnableFirehoseNozzleDefaultConfigTest {
 		
 		assertNotNull(props);
 
-		assertEquals(props.getApiEndpoint(), EnableFirehoseNozzle.DEFAULT_API_ENDPOINT);
-		assertEquals(props.getUsername(), EnableFirehoseNozzle.DEFAULT_USERNAME);
-		assertEquals(props.getPassword(), EnableFirehoseNozzle.DEFAULT_PASSWORD);
-		assertEquals(props.isSkipSslValidation(), new Boolean(EnableFirehoseNozzle.DEFAULT_SKIP_SSL_VALIDATION).booleanValue());
+		assertEquals(props.getApiEndpoint(), "http://prop.endpoint");
+		assertEquals(props.getUsername(), "prop_username");
+		assertEquals(props.getPassword(), "prop_password");
+		assertEquals(props.isSkipSslValidation(), true);
 		
 		assertTrue(props.isValidConfiguration());
 		
@@ -55,5 +69,4 @@ public class EnableFirehoseNozzleDefaultConfigTest {
 		FirehoseReader reader = (FirehoseReader)context.getBean(FirehoseReader.class);
 		
 	}
-	
 }
