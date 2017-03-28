@@ -47,7 +47,8 @@ public class FirehoseNozzleConfiguration {
     }
     
 
-    private String getApiHost(FirehoseProperties properties) {
+    @SuppressWarnings("finally")
+	private String getApiHost(FirehoseProperties properties) {
         String apiHost = properties.getApiEndpoint();
 
         // in a tile context, this may get passed as a full URL, but we just need the hostname

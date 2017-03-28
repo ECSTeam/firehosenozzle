@@ -2,9 +2,7 @@ package com.ecsteam.firehose.nozzle.annotation;
 
 import java.util.Properties;
 
-import org.hamcrest.CustomMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -26,10 +24,8 @@ import com.ecsteam.firehose.nozzle.annotation.application.WrongParamsOnErrorNozz
 import com.ecsteam.firehose.nozzle.mock.MockDopplerClientProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-// @SpringBootTest(classes = {ApplicationTest1.class, NoParamsNozzleTest.class})
 public class FirehoseNozzleNoParamsTest {
 
-	// @Autowired
 	ApplicationContext context;
 
 	@Rule

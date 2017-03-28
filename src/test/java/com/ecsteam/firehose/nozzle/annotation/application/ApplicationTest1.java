@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.ecsteam.firehose.nozzle.annotation.EnableFirehoseNozzle;
 
-//@SpringBootApplication
 @EnableFirehoseNozzle
 public class ApplicationTest1 {
 

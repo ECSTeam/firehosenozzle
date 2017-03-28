@@ -48,8 +48,8 @@ public class FirehoseProperties {
         if (names.length == 1) {
         	FirehoseConnectorServiceInfo serviceInfo = getFirehoseConnectorServiceInfo();
         	if (serviceInfo == null) {
-        		log.info("***********************************************************");
-        		log.info("Constructing FirehoseProperties using annotation attributes or defaults");
+
+        		log.debug("Constructing FirehoseProperties using annotation attributes or defaults");
 		        EnableFirehoseNozzle efh = context.findAnnotationOnBean(names[0],EnableFirehoseNozzle.class);
 		        this.apiEndpoint = substituteProperties(efh.apiEndpoint());
 		        this.username = substituteProperties(efh.username());
@@ -64,27 +64,27 @@ public class FirehoseProperties {
 		        }
         	}
         	else {
-        		log.info("***********************************************************");
-        		log.info("Constructing FirehoseProperties using bound service credentials");
+
+        		log.debug("Constructing FirehoseProperties using bound service credentials");
         		this.apiEndpoint = serviceInfo.getApiEndpoint();
         		this.username = serviceInfo.getUsername();
         		this.password = serviceInfo.getPassword();
         		this.skipSslValidation = serviceInfo.isSkipSslValidation();
         	}
 	
-	        log.info("************ FirehoseProperties CONSTRUCTED! " + Calendar.getInstance().getTimeInMillis() + " **************");
-	        log.info("************ " + this.toString());
+	        log.debug("************ FirehoseProperties CONSTRUCTED! " + Calendar.getInstance().getTimeInMillis() + " **************");
+	        log.debug("************ " + this.toString());
         }
         else if (names.length > 1) {
-        	log.info("Expecting exactly one bean with EnableFirehoseNozzle annotation, found " + names.length);
-        	log.info("Bean names:");
+        	log.error("Expecting exactly one bean with EnableFirehoseNozzle annotation, found " + names.length);
+        	log.error("Bean names:");
         	for (String name : names) {
-        		log.info(name);
+        		log.error(name);
         	}
         	setNoValues();
         }
         else {
-        	log.info("EnableFirehoseNozzle library on path yet no beans found with EnableFirehoseNozzle annotation");
+        	log.error("EnableFirehoseNozzle library on path yet no beans found with EnableFirehoseNozzle annotation");
         	setNoValues();
         }
     }

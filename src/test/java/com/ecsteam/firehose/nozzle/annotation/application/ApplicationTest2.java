@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.ecsteam.firehose.nozzle.annotation.EnableFirehoseNozzle;
 
-//@SpringBootApplication
 @EnableFirehoseNozzle(apiEndpoint = "https://home.api", username = "scott", password = "tiger", skipSslValidation = "false")
 public class ApplicationTest2 {
 
