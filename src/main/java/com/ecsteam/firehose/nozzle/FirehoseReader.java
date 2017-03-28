@@ -52,9 +52,13 @@ public class FirehoseReader implements SmartLifecycle {
 
 	private boolean running = false;
 	private boolean isValid = false;
+	
+	private ApplicationContext context;
 
 	@Autowired
 	public FirehoseReader(FirehoseProperties props, ApplicationContext context, DopplerClient dopplerClient) {
+		
+		this.context = context;
 
 		log.debug("************ FirehoseReader CONSTRUCTED! (" + this.hashCode() + ") "
 				+ Calendar.getInstance().getTimeInMillis() + " **************");
@@ -316,7 +320,12 @@ public class FirehoseReader implements SmartLifecycle {
 		if (fcSI != null) {
 			subscriptionId = fcSI.getSubscriptionId();
 		} else if (fn != null) {
-			subscriptionId = fn.subscriptionId();
+			if (context != null) {
+				subscriptionId = context.getEnvironment().resolvePlaceholders(fn.subscriptionId());
+			}
+			else {
+				subscriptionId = fn.subscriptionId();
+			}
 		} else {
 			subscriptionId = "";
 		}
