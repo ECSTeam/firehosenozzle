@@ -13,7 +13,7 @@ public class FirehoseConnectorServiceInfoCreator extends CloudFoundryServiceInfo
 	public FirehoseConnectorServiceInfoCreator() {
 		super(new Tags(), new String[1]);
 	}
-	
+
 	public FirehoseConnectorServiceInfoCreator(Tags tags, String[] uriSchemes) {
 		super(tags, uriSchemes);
 	}
@@ -37,8 +37,33 @@ public class FirehoseConnectorServiceInfoCreator extends CloudFoundryServiceInfo
 		log.debug("**************************");
 		log.debug("in the create method of FirehoseConnectorServiceInfoCreator");
 		log.debug("returning a serviceInfo that looks like:" + serviceInfo.toString());
-		
+
 		return serviceInfo;
+
+	}
+
+	private boolean checkForValidKey(String key, Map<String, Object> configParams) {
+
+		boolean retVal = false;
+
+		if (configParams.containsKey(key)) {
+			Object value = configParams.get(key);
+			if (value != null) {
+				if (value instanceof String) {
+					String stringVal = (String) value;
+					if (stringVal.length() > 0) {
+						retVal = true;
+					}
+				}
+				else {
+					retVal = true;
+				}
+			}
+		}
+
+
+		return retVal;
+
 	}
 
 	@Override
@@ -54,9 +79,18 @@ public class FirehoseConnectorServiceInfoCreator extends CloudFoundryServiceInfo
 		if (configParams.containsKey("serviceType")) {
 			String serviceType = (String) configParams.get("serviceType");
 			retVal = serviceType.contains("firehose");
+
+			if (retVal) {
+
+				retVal = ((checkForValidKey("name", configParams)) && (checkForValidKey("subscriptionId", configParams))
+						&& (checkForValidKey("username", configParams)) && (checkForValidKey("password", configParams))
+						&& (checkForValidKey("apiEndpoint", configParams))
+						&& (checkForValidKey("skipSslValidation", configParams)));
+			}
+
 		}
 
-		log.debug("retVal = " + retVal);
+		log.debug("******* retVal = " + retVal);
 
 		return retVal;
 
