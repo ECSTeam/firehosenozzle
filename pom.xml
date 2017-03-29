@@ -5,7 +5,7 @@
 
 	<groupId>com.ecsteam</groupId>
 	<artifactId>firehosenozzle</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>firehosenozzle</name>
@@ -86,6 +86,7 @@
 	</build>
 	-->
 	<build>
+		<finalName>firehosenozzle</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
