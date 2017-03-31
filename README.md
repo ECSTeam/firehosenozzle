@@ -61,6 +61,7 @@ This project also takes advantage of the Spring Cloud Connector architecture to 
 
 1. apiEndpoint
 1. password
+1. name
 1. serviceType
 1. skipSslValidation
 1. subscriptionId
