@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface EnableFirehoseNozzle {
 	
-	public static final String DEFAULT_API_ENDPOINT = "https://api.bosh-lite.com";
+	public static final String DEFAULT_API_ENDPOINT = "https://api.local.pcfdev.io";
 	public static final String DEFAULT_USERNAME = "admin";
 	public static final String DEFAULT_PASSWORD = "admin";
 	public static final String DEFAULT_SKIP_SSL_VALIDATION = "true";
