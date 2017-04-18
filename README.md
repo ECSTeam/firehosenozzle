@@ -8,7 +8,7 @@ There are four annotations to use:
 
 This annotation belongs at the application level and is required.  This will set the initial configuration of the doppler client and prepare the application for the other annotations.  It takes these four optional attributes:
 
-apiEndpoint:  The doppler endpoint.  For Cloud Foundry implementations, this can point to the api endpoint (usually api.<system domain>) (defaults to https://api.bosh-lite.com)
+apiEndpoint:  The doppler endpoint.  For Cloud Foundry implementations, this can point to the api endpoint (usually api.<system domain>) (defaults to https://api.local.pcfdev.io)
 
 username:  a user with the doppler.client permissions (defaults to 'admin')
 
